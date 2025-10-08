@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>BBank</title>
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
+        :root {
+            --bg-color: #1a1a2e; --primary-color: #a955f7; --card-color: #24243e;
+            --text-color: #e0e0e0; --text-secondary-color: #a0a0b5; --accent-green: #27ae60;
+            --accent-blue: #2980b9; --ripple-color: rgba(41, 128, 185, 0.7);
+        }
+        body {
+            margin: 0; font-family: 'Manrope', sans-serif; background-color: var(--bg-color);
+            color: var(--text-color); -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+        }
+        #app-container {
+            width: 100vw; height: 100vh; overflow: hidden; position: relative;
+            display: flex; flex-direction: column;
+        }
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;
+            display: flex; flex-direction: column; background-color: var(--bg-color);
+        }
+        .screen.active { opacity: 1; visibility: visible; }
+        .page-header {
+            display: flex; align-items: center; padding: 25px; position: relative;
+        }
+        .back-button {
+            font-size: 28px; cursor: pointer; color: var(--text-color);
+            padding: 10px; position: absolute; left: 15px;
+        }
+        .page-header h1 { font-size: 22px; margin: 0 auto; }
+        .page-content { padding: 0 25px 25px; text-align: center; flex-grow: 1; overflow-y: auto; }
+        .btn {
+            display: block; width: 100%; padding: 15px; margin-bottom: 15px;
+            border-radius: 15px; border: none; font-size: 16px; font-weight: 600;
+            cursor: pointer; position: relative; overflow: hidden;
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: var(--card-color); color: var(--text-color); }
+
+        #splash-screen { justify-content: center; align-items: center; }
+        .logo-container { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .logo {
+            width: 120px; height: 120px; background: linear-gradient(145deg, var(--primary-color), #7b2cbf);
+            border-radius: 30px; display: flex; justify-content: center; align-items: center;
+            font-size: 80px; font-weight: 800; color: white;
+            box-shadow: 0 10px 20px rgba(169, 85, 247, 0.3); margin-bottom: 20px;
+        }
+        .app-title { font-size: 32px; font-weight: 800; }
+        .app-subtitle { font-size: 16px; color: var(--text-secondary-color); }
+        #login-button {
+            margin-top: 50px; padding: 15px 60px; font-size: 18px;
+            opacity: 0; visibility: hidden; transition: opacity 0.5s, visibility 0.5s;
+        }
+        #login-button.visible { opacity: 1; visibility: visible; }
+
+        #pin-screen { justify-content: space-around; align-items: center; }
+        .pin-container { text-align: center; }
+        .pin-title { font-size: 20px; margin-bottom: 20px; }
+        .pin-dots { display: flex; justify-content: center; margin-bottom: 40px; }
+        .dot {
+            width: 15px; height: 15px; border: 2px solid var(--text-secondary-color);
+            border-radius: 50%; margin: 0 10px; transition: background-color 0.2s;
+        }
+        .dot.filled { background-color: var(--primary-color); border-color: var(--primary-color); }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .key {
+            width: 75px; height: 75px; border-radius: 50%; border: none;
+            background-color: var(--card-color); color: var(--text-color);
+            font-size: 28px; font-weight: 600; cursor: pointer;
+            position: relative; overflow: hidden;
+        }
+        .key:active { background-color: #3c3c5a; }
+
+        #main-screen { justify-content: space-between; }
+        .main-content { padding: 25px; overflow-y: auto; flex-grow: 1; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header-title h1 { margin: 0; font-size: 24px; font-weight: 800; }
+        .header-title p { margin: 0; color: var(--text-secondary-color); }
+        .profile-icon { width: 45px; height: 45px; background-color: var(--card-color); border-radius: 50%; }
+        .balance-card {
+            background: linear-gradient(145deg, #7b2cbf, var(--primary-color));
+            border-radius: 20px; padding: 20px; text-align: center; color: white;
+            box-shadow: 0 10px 20px rgba(169, 85, 247, 0.2); margin-bottom: 30px;
+        }
+        .balance-card p { margin: 0; font-size: 16px; opacity: 0.8; }
+        .balance-card h2 { margin: 5px 0 0; font-size: 40px; font-weight: 800; }
+        .widget {
+            background-color: var(--card-color); border-radius: 20px; padding: 20px;
+            margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; position: relative; overflow: hidden;
+        }
+        .widget-info { display: flex; align-items: center; }
+        .widget-icon { width: 50px; height: 50px; border-radius: 15px; margin-right: 15px; display: flex; justify-content: center; align-items: center; }
+        .widget-icon.internet { background-color: var(--accent-blue); }
+        .widget-icon.calls { background-color: var(--accent-green); }
+        .widget-icon span { font-size: 24px; }
+        .widget-text h3 { margin: 0; font-size: 18px; }
+        .widget-text p { margin: 2px 0 0; color: var(--text-secondary-color); }
+        .widget-arrow { font-size: 24px; color: var(--text-secondary-color); }
+        .main-content > * {
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        #main-screen.active .main-content > * { opacity: 1; transform: translateY(0); }
+        #main-screen.active .main-content > *:nth-child(1) { transition-delay: 0.1s; }
+        #main-screen.active .main-content > *:nth-child(2) { transition-delay: 0.2s; }
+        #main-screen.active .main-content > *:nth-child(3) { transition-delay: 0.3s; }
+        #main-screen.active .main-content > *:nth-child(4) { transition-delay: 0.4s; }
+
+        .bottom-nav {
+            display: flex; justify-content: space-around; background-color: var(--card-color);
+            padding: 10px 0 20px; border-top-left-radius: 25px; border-top-right-radius: 25px;
+            flex-shrink: 0;
+        }
+        .nav-item {
+            cursor: pointer; padding: 10px; display: flex; flex-direction: column;
+            align-items: center; color: var(--text-secondary-color); transition: color 0.2s ease;
+            position: relative; overflow: hidden; border-radius: 16px;
+        }
+        .nav-item.active { color: var(--primary-color); }
+        .nav-item span { font-size: 28px; }
+        .nav-item p { font-size: 12px; margin: 2px 0 0; }
+
+        .subtitle { color: var(--text-secondary-color); margin-top: 0; }
+        .canvas-container { position: relative; width: 200px; height: 200px; margin: 20px auto; }
+        #internet-canvas { width: 100%; height: 100%; }
+        .canvas-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .canvas-text h2 { margin: 0; font-size: 32px; }
+        .canvas-text p { margin: 0; color: var(--text-secondary-color); }
+        .action-buttons { margin-top: 30px; }
+        #calls-screen .status-text { font-size: 32px; font-weight: 800; margin: 40px 0; }
+        #calls-screen .status-description {
+            font-size: 16px; color: var(--text-secondary-color); line-height: 1.5;
+            max-width: 300px; margin: 0 auto 40px;
+        }
+
+        #settings-screen .page-content { padding-top: 20px; }
+
+        /* --- Ripple Effect --- */
+        .ripple {
+            position: absolute; border-radius: 50%; background-color: var(--ripple-color);
+            transform: scale(0); animation: ripple-animation 0.6s linear;
+        }
+        @keyframes ripple-animation { to { transform: scale(4); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- ЭКРАН 1: ЗАГРУЗКА -->
+        <div id="splash-screen" class="screen active">
+            <div class="logo-container">
+                <div class="logo">B</div>
+                <div class="app-title">BBank</div>
+                <p class="app-subtitle">Банк и связь на новом уровне</p>
+                <button id="login-button" class="btn btn-primary">Войти</button>
+            </div>
+        </div>
+
+        <div id="pin-screen" class="screen">
+            <div class="pin-container">
+                <h2 class="pin-title">Введите ваш PIN-код</h2>
+                <div class="pin-dots">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+                <div class="keypad">
+                    <!-- Кнопки будут добавлены через JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="main-screen" class="screen">
+            <div class="main-content">
+                <div class="header">
+                    <div class="header-title"><h1>Здравствуйте!</h1><p>Добро пожаловать в BBank</p></div>
+                    <div class="profile-icon"></div>
+                </div>
+                <div class="balance-card"><p>Ваш баланс</p><h2>267,345 ₽</h2></div>
+                <div id="tariff-widget" class="widget">
+                    <div class="widget-info"><div class="widget-icon internet"><span>&#127760;</span></div><div class="widget-text"><h3>Интернет</h3><p>21,3 ГБ из 30,0 ГБ</p></div></div>
+                    <div class="widget-arrow">&gt;</div>
+                </div>
+                <div id="calls-widget" class="widget">
+                    <div class="widget-info"><div class="widget-icon calls"><span>&#128222;</span></div><div class="widget-text"><h3>Звонки</h3><p>Закончились</p></div></div>
+                    <div class="widget-arrow">&gt;</div>
+                </div>
+            </div>
+            <nav class="bottom-nav">
+                <div class="nav-item active" data-target="main-screen"><span>&#127968;</span><p>Главная</p></div>
+                <div class="nav-item" data-target="main-screen"><span>&#128179;</span><p>Платежи</p></div>
+                <div class="nav-item" data-target="main-screen"><span>&#128178;</span><p>Карты</p></div>
+                <div class="nav-item" data-target="settings-screen"><span>&#9881;</span><p>Настройки</p></div>
+            </nav>
+        </div>
+
+        <div id="tariff-screen" class="screen">
+            <header class="page-header"><div class="back-button" data-target="main-screen">&lt;</div><h1>Интернет</h1></header>
+            <div class="page-content">
+                <p class="subtitle">Тариф "Вместе Дешевле 1.1"</p>
+                <div class="canvas-container">
+                    <canvas id="internet-canvas" width="400" height="400"></canvas>
+                    <div class="canvas-text"><h2>21,3</h2><p>из 30,0 ГБ</p></div>
+                </div>
+                <div class="action-buttons"><button class="btn btn-primary">Купить 5 ГБ</button><button class="btn btn-secondary">Купить 1 ГБ</button></div>
+            </div>
+        </div>
+
+        <div id="calls-screen" class="screen">
+            <header class="page-header"><div class="back-button" data-target="main-screen">&lt;</div><h1>Звонки</h1></header>
+            <div class="page-content">
+                <p class="subtitle">Тариф "Вместе Дешевле 1.1"</p>
+                <h2 class="status-text">Закончились</h2>
+                <p class="status-description">Минуты на номера других операторов по вашему тарифу израсходованы.</p>
+                <div class="action-buttons"><button class="btn btn-primary">Купить 100 минут</button><button class="btn btn-secondary">Купить 50 минут</button></div>
+            </div>
+        </div>
+
+        <div id="settings-screen" class="screen">
+            <header class="page-header"><h1>Настройки</h1></header>
+            <div class="page-content">
+                <button id="logout-button" class="btn btn-secondary">Выход</button>
+            </div>
+            <nav class="bottom-nav">
+                <div class="nav-item" data-target="main-screen"><span>&#127968;</span><p>Главная</p></div>
+                <div class="nav-item" data-target="main-screen"><span>&#128179;</span><p>Платежи</p></div>
+                <div class="nav-item" data-target="main-screen"><span>&#128178;</span><p>Карты</p></div>
+                <div class="nav-item active" data-target="settings-screen"><span>&#9881;</span><p>Настройки</p></div>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        const appContainer = document.getElementById('app-container');
+
+        function switchScreen(targetId) {
+            document.querySelectorAll('.screen.active').forEach(s => s.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+        }
+
+        setTimeout(() => {
+            document.getElementById('login-button').classList.add('visible');
+        }, 3000);
+
+        document.getElementById('login-button').addEventListener('click', () => {
+            switchScreen('pin-screen');
+        });
+
+        async function login() {
+            try {
+                await appContainer.requestFullscreen();
+                switchScreen('main-screen');
+            } catch (err) {
+                alert('Не удалось перейти в полноэкранный режим. Доступ запрещен.');
+                resetPin();
+                switchScreen('pin-screen');
+            }
+        }
+
+        async function logout() {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+            }
+            resetPin();
+            switchScreen('pin-screen');
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && document.getElementById('main-screen').classList.contains('active')) {
+                logout();
+            }
+        });
+        
+        document.getElementById('logout-button').addEventListener('click', logout);
+
+        const pinDots = document.querySelectorAll('.pin-dots .dot');
+        const keypadContainer = document.querySelector('.keypad');
+        let pinCode = '';
+
+        function handlePinInput(digit) {
+            if (pinCode.length < 4) {
+                pinCode += digit;
+                updatePinDots();
+                if (pinCode.length === 4) {
+                    setTimeout(login, 200);
+                }
+            }
+        }
+        
+        function resetPin() {
+            pinCode = '';
+            updatePinDots();
+        }
+
+        function updatePinDots() {
+            pinDots.forEach((dot, index) => {
+                dot.classList.toggle('filled', index < pinCode.length);
+            });
+        }
+
+        const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, '⌫'];
+        keys.forEach(key => {
+            const keyElement = document.createElement('button');
+            keyElement.className = 'key';
+            keyElement.textContent = key;
+            if (key === '') keyElement.style.visibility = 'hidden';
+            keyElement.addEventListener('click', () => {
+                if (typeof key === 'number') handlePinInput(key);
+                if (key === '⌫') {
+                    pinCode = pinCode.slice(0, -1);
+                    updatePinDots();
+                }
+            });
+            keypadContainer.appendChild(keyElement);
+        });
+
+        document.querySelectorAll('.back-button').forEach(button => {
+            button.addEventListener('click', (e) => switchScreen(e.currentTarget.dataset.target));
+        });
+        document.getElementById('tariff-widget').addEventListener('click', () => switchScreen('tariff-screen'));
+        document.getElementById('calls-widget').addEventListener('click', () => switchScreen('calls-screen'));
+
+        const navItems = document.querySelectorAll(".nav-item");
+        const bottomNavs = document.querySelectorAll('.bottom-nav');
+        
+        function setActiveNav(targetScreen) {
+            bottomNavs.forEach(nav => {
+                nav.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.target === targetScreen);
+                });
+            });
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const targetScreen = e.currentTarget.dataset.target;
+                switchScreen(targetScreen);
+                setActiveNav(targetScreen);
+            });
+        });
+
+        const canvas = document.getElementById('internet-canvas');
+        const ctx = canvas.getContext('2d');
+        const totalGb = 30.0, usedGb = 21.3;
+        const remainingPercentage = (usedGb / totalGb);
+        const centerX = canvas.width / 2, centerY = canvas.height / 2;
+        const radius = 180, lineWidth = 30;
+        const startAngle = -0.5 * Math.PI;
+        const endAngle = startAngle + (remainingPercentage * 2 * Math.PI);
+        ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.lineWidth = lineWidth; ctx.strokeStyle = '#24243e'; ctx.stroke();
+        ctx.beginPath(); ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.lineWidth = lineWidth; ctx.strokeStyle = '#2980b9'; ctx.lineCap = 'round'; ctx.stroke();
+
+        function createRipple(event) {
+            const element = event.currentTarget;
+            const circle = document.createElement("span");
+            const diameter = Math.max(element.clientWidth, element.clientHeight);
+            const radius = diameter / 2;
+            circle.style.width = circle.style.height = `${diameter}px`;
+            const rect = element.getBoundingClientRect();
+            circle.style.left = `${event.clientX - rect.left - radius}px`;
+            circle.style.top = `${event.clientY - rect.top - radius}px`;
+            circle.classList.add("ripple");
+            const ripple = element.getElementsByClassName("ripple")[0];
+            if (ripple) { ripple.remove(); }
+            element.appendChild(circle);
+        }
+        document.querySelectorAll(".widget, .nav-item, .btn, .key").forEach(el => {
+            el.addEventListener("click", createRipple);
+        });
+    </script>
+
+</body>
+</html>
+
