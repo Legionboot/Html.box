@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Mono Super Platform</title>
+  <link rel="preload" href="icons.svg" as="image" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js" defer></script>
+</head>
+<body>
+  <div id="app" class="app" aria-live="polite">
+    <header class="top-bar" role="banner">
+      <button class="icon-button" id="backButton" aria-label="Назад" data-visible="false">
+        <svg><use href="icons.svg#chevron-left"></use></svg>
+      </button>
+      <div class="top-bar__title" id="topTitle">Супер</div>
+      <button class="icon-button" id="topAction" aria-label="Действия" data-visible="false">
+        <svg><use href="icons.svg#more"></use></svg>
+      </button>
+    </header>
+
+    <main id="main" class="main" role="main">
+      <div class="screen" id="screen-chats" data-screen="chats" aria-hidden="false"></div>
+      <div class="screen" id="screen-chat" data-screen="chat" aria-hidden="true"></div>
+      <div class="screen" id="screen-feed" data-screen="feed" aria-hidden="true"></div>
+      <div class="screen" id="screen-video" data-screen="video" aria-hidden="true"></div>
+      <div class="screen" id="screen-photo" data-screen="photo" aria-hidden="true"></div>
+      <div class="screen" id="screen-search" data-screen="search" aria-hidden="true"></div>
+      <div class="screen" id="screen-profile" data-screen="profile" aria-hidden="true"></div>
+    </main>
+
+    <nav class="bottom-nav" role="navigation" aria-label="Главная навигация">
+      <button class="nav-item" data-target="chats" aria-label="Чаты">
+        <svg><use href="icons.svg#chat"></use></svg>
+        <span>Чаты</span>
+      </button>
+      <button class="nav-item" data-target="feed" aria-label="Лента">
+        <svg><use href="icons.svg#feed"></use></svg>
+        <span>Лента</span>
+      </button>
+      <button class="nav-item" data-target="video" aria-label="Видео">
+        <svg><use href="icons.svg#video"></use></svg>
+        <span>Видео</span>
+      </button>
+      <button class="nav-item" data-target="photo" aria-label="Фото">
+        <svg><use href="icons.svg#photo"></use></svg>
+        <span>Фото</span>
+      </button>
+      <button class="nav-item" data-target="search" aria-label="Поиск">
+        <svg><use href="icons.svg#search"></use></svg>
+        <span>Поиск</span>
+      </button>
+      <button class="nav-item" data-target="profile" aria-label="Профиль">
+        <svg><use href="icons.svg#profile"></use></svg>
+        <span>Профиль</span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="dev-panel" id="devPanel" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="dev-panel__header">
+      <span>Developer Mode</span>
+      <button class="icon-button" id="closeDev" aria-label="Закрыть Dev Mode">
+        <svg><use href="icons.svg#close"></use></svg>
+      </button>
+    </div>
+    <div class="dev-panel__tabs" role="tablist">
+      <button role="tab" data-tab="db" aria-selected="true">DB</button>
+      <button role="tab" data-tab="editor" aria-selected="false">Editor</button>
+      <button role="tab" data-tab="logs" aria-selected="false">Logs</button>
+      <button role="tab" data-tab="settings" aria-selected="false">Settings</button>
+    </div>
+    <div class="dev-panel__content" id="devContent">
+      <section data-tab="db" aria-labelledby="DB" class="dev-tab active">
+        <div class="dev-toolbar">
+          <label>
+            Таблица
+            <select id="devTable"></select>
+          </label>
+          <input type="search" id="devFilter" placeholder="Фильтр" aria-label="Фильтр записей">
+          <button id="devRefresh">Обновить</button>
+        </div>
+        <pre class="dev-pre" id="devData" tabindex="0"></pre>
+      </section>
+      <section data-tab="editor" class="dev-tab">
+        <textarea id="devEditor" spellcheck="false" aria-label="JSON редактор"></textarea>
+        <div class="dev-actions">
+          <button id="devImport">Импорт</button>
+          <button id="devExport">Экспорт</button>
+          <button id="devApply">Применить</button>
+        </div>
+      </section>
+      <section data-tab="logs" class="dev-tab">
+        <pre class="dev-pre" id="devLogs" tabindex="0"></pre>
+      </section>
+      <section data-tab="settings" class="dev-tab">
+        <div class="dev-settings">
+          <button id="devReset">Сбросить базу</button>
+          <label class="toggle">
+            <input type="checkbox" id="reduceMotion">
+            <span>Prefers Reduced Motion</span>
+          </label>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div class="dev-panel__backdrop" id="devBackdrop" hidden></div>
+</body>
+</html>

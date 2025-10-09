@@ -1,0 +1,37 @@
+{
+  "users": [
+    { "id": "u1", "name": "Алекс", "avatar": "", "bio": "Интерфейсы и прототипы", "createdAt": 1690000000000 },
+    { "id": "u2", "name": "Мария", "avatar": "", "bio": "Фотограф", "createdAt": 1691000000000 }
+  ],
+  "profiles": [
+    { "id": "p1", "userId": "u1", "handle": "alex.design", "settings": { "notifications": true }, "active": true },
+    { "id": "p2", "userId": "u2", "handle": "maria.lens", "settings": { "notifications": true }, "active": false }
+  ],
+  "chats": [
+    { "id": "c1", "type": "personal", "title": "Сам себе", "participants": ["p1"], "pinned": true, "archived": false, "lastMessageId": "m3" },
+    { "id": "c2", "type": "dialog", "title": "Алекс ↔ Мария", "participants": ["p1", "p2"], "pinned": false, "archived": false, "lastMessageId": "m5" },
+    { "id": "c3", "type": "channel", "title": "Mono Updates", "participants": ["p1"], "pinned": false, "archived": false, "lastMessageId": "m6" }
+  ],
+  "messages": [
+    { "id": "m1", "chatId": "c1", "senderProfileId": "p1", "text": "Привет себе!", "attachments": [], "time": 1690000000100, "edited": false, "deleted": false },
+    { "id": "m2", "chatId": "c1", "senderProfileId": "p1", "text": "Помни про демо", "attachments": [], "time": 1690000500000, "edited": false, "deleted": false },
+    { "id": "m3", "chatId": "c1", "senderProfileId": "p1", "text": "Проверить Dev Mode", "attachments": [], "time": 1690000800000, "edited": false, "deleted": false },
+    { "id": "m4", "chatId": "c2", "senderProfileId": "p1", "text": "Как продвигается фотосъёмка?", "attachments": [], "time": 1691000000000, "edited": false, "deleted": false },
+    { "id": "m5", "chatId": "c2", "senderProfileId": "p2", "text": "Готовлю подборку для ленты", "attachments": [], "time": 1691000600000, "edited": false, "deleted": false },
+    { "id": "m6", "chatId": "c3", "senderProfileId": "p1", "text": "Mono Super Platform 0.1 вышла!", "attachments": [], "time": 1691100000000, "edited": false, "deleted": false }
+  ],
+  "posts": [
+    { "id": "post1", "authorProfileId": "p1", "type": "text", "content": "Новый дизайн Mono Super Platform.", "media": [], "time": 1691105000000, "likesCount": 3 },
+    { "id": "post2", "authorProfileId": "p2", "type": "photo", "content": "Кадр из ночного города.", "media": [{ "kind": "photo", "src": "photo-01" }], "time": 1691200000000, "likesCount": 5 },
+    { "id": "post3", "authorProfileId": "p2", "type": "video", "content": "Мини-клип с backstage.", "media": [{ "kind": "video", "src": "video-01" }], "time": 1691204000000, "likesCount": 2 }
+  ],
+  "comments": [
+    { "id": "cm1", "postId": "post1", "authorProfileId": "p2", "text": "Жду релиз!", "time": 1691108000000 },
+    { "id": "cm2", "postId": "post2", "authorProfileId": "p1", "text": "Отличная композиция", "time": 1691202000000 }
+  ],
+  "likes": [
+    { "id": "lk1", "postId": "post1", "profileId": "p2", "time": 1691105100000 },
+    { "id": "lk2", "postId": "post2", "profileId": "p1", "time": 1691202100000 }
+  ],
+  "logs": []
+}
