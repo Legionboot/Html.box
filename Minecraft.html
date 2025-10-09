@@ -7,13 +7,16 @@
 		<title>Minecraft</title>
 		<link rel="shortcut icon" type="image/ico" href="https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/favicon.ico">
 	</head>
-	<style>
+        <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
-		body {
-			overflow: hidden; /* Hide scrollbars */
-		}
-		.world-select {
-			width: 99vw;
+                body {
+                        overflow: hidden; /* Hide scrollbars */
+                }
+                canvas {
+                        touch-action: none;
+                }
+                .world-select {
+                        width: 99vw;
 			min-width: 300px;
 			height: calc(100vh - 220px);
 			position: absolute;
@@ -77,34 +80,126 @@
 			z-index: 1;
 			padding: 10px;
 			cursor: default;
-		}
-		#quota {
-			display: block;
-			position: absolute;
-			width: 99vw;
+                }
+                #quota {
+                        display: block;
+                        position: absolute;
+                        width: 99vw;
 			margin: 0 auto;
 			bottom: 110px;
 			z-index: 1;
 			background-color: RGBA(0, 0, 0, 0.6);
-			justify-content: center;
-			text-align: center;
-			color: white;
+                        justify-content: center;
+                        text-align: center;
+                        color: white;
       font-family: 'Poppins', sans-serif;
-		}
-	</style>
-	<body>
-	<canvas id="overlay" tabindex="0" width="600" height="600" style="position: absolute; top: 0px; left: 0px"></canvas>
-	<input type="text" id="savebox" class="hidden" spellcheck="false" style="position: absolute; top: 10px; left: 10px; z-index: 1;">
-	<input type="text" id="boxcentertop" class="hidden" spellcheck="false">
-	<div id="quota" class="hidden"></div>
-	<div id="onhover" class="hidden"></div>
-	<p id="savedirections" class="hidden" style="position: absolute; top: 40px; left: 10px; z-index: 1; background-color: rgba(255, 255, 255, 0.3);">
-		JSCRAFT!
-	</p>
-	<div class="world-select hidden" id="worlds"></div>
-	<p id="message" class="hidden" style="position: absolute; top: 10px; right: 10px; z-index: 1; text-align: right; background-color: rgba(255, 255, 255, 0.3);"></p>
-	<script>
-		// Code edits will erase the world.
+                }
+                .touch-controls {
+                        position: absolute;
+                        inset: 0;
+                        pointer-events: none;
+                        z-index: 2;
+                        opacity: 0;
+                        transition: opacity 0.15s ease;
+                }
+                .touch-controls.touch-active {
+                        opacity: 1;
+                }
+                .touch-controls:not(.touch-active) .joystick,
+                .touch-controls:not(.touch-active) .touch-button {
+                        pointer-events: none;
+                }
+                .touch-controls .joystick {
+                        position: absolute;
+                        width: 140px;
+                        height: 140px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.05);
+                        border: 2px solid rgba(255, 255, 255, 0.2);
+                        pointer-events: auto;
+                }
+                #move-joystick {
+                        left: 20px;
+                        bottom: 20px;
+                }
+                #look-joystick {
+                        right: 20px;
+                        bottom: 20px;
+                }
+                .joystick-thumb {
+                        position: absolute;
+                        width: 60px;
+                        height: 60px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.4);
+                        border: 2px solid rgba(255, 255, 255, 0.6);
+                        left: calc(50% - 30px);
+                        top: calc(50% - 30px);
+                        transform: translate(0px, 0px);
+                        transition: transform 0.05s linear;
+                }
+                .touch-button {
+                        position: absolute;
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 16px;
+                        border: 2px solid rgba(255, 255, 255, 0.6);
+                        background: rgba(0, 0, 0, 0.45);
+                        color: #fff;
+                        font-family: 'Poppins', sans-serif;
+                        font-size: 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        pointer-events: auto;
+                        user-select: none;
+                }
+                .touch-button:active {
+                        background: rgba(255, 255, 255, 0.2);
+                        color: #e0e0e0;
+                }
+                #jump-button {
+                        right: 20px;
+                        bottom: 150px;
+                }
+                #place-button {
+                        right: 20px;
+                        bottom: 50px;
+                }
+                #attack-button {
+                        right: 120px;
+                        bottom: 90px;
+                }
+                #sneak-button {
+                        right: 120px;
+                        bottom: 180px;
+                }
+        </style>
+        <body>
+        <canvas id="overlay" tabindex="0" width="600" height="600" style="position: absolute; top: 0px; left: 0px"></canvas>
+        <input type="text" id="savebox" class="hidden" spellcheck="false" style="position: absolute; top: 10px; left: 10px; z-index: 1;">
+        <input type="text" id="boxcentertop" class="hidden" spellcheck="false">
+        <div id="quota" class="hidden"></div>
+        <div id="onhover" class="hidden"></div>
+        <p id="savedirections" class="hidden" style="position: absolute; top: 40px; left: 10px; z-index: 1; background-color: rgba(255, 255, 255, 0.3);">
+                JSCRAFT!
+        </p>
+        <div class="world-select hidden" id="worlds"></div>
+        <p id="message" class="hidden" style="position: absolute; top: 10px; right: 10px; z-index: 1; text-align: right; background-color: rgba(255, 255, 255, 0.3);"></p>
+        <div id="touch-controls" class="touch-controls hidden">
+                <div class="joystick" id="move-joystick">
+                        <div class="joystick-thumb"></div>
+                </div>
+                <div class="joystick" id="look-joystick">
+                        <div class="joystick-thumb"></div>
+                </div>
+                <div class="touch-button" id="jump-button">Jump</div>
+                <div class="touch-button" id="sneak-button">Sneak</div>
+                <div class="touch-button" id="attack-button">Break</div>
+                <div class="touch-button" id="place-button">Place</div>
+        </div>
+        <script>
+                // Code edits will erase the world.
 		// Place save code here to load your world. Make extra sure you got it copied so you don't paste in the wrong thing and delete your world on accident lol
 		var loadString = ""
 	</script>
@@ -193,6 +288,8 @@ window.message = document.getElementById("message")
 window.worlds = document.getElementById("worlds")
 window.quota = document.getElementById("quota")
 var hoverbox = document.getElementById("onhover")
+const touchControlsContainer = document.getElementById("touch-controls")
+const touchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints && navigator.msMaxTouchPoints > 0)
 ctx.canvas.width  = window.innerWidth
 ctx.canvas.height = window.innerHeight
 
@@ -1216,12 +1313,15 @@ function MineKhan() {
 			html[screen].onexit()
 		}
 
-		previousScreen = screen
-		screen = newScene
-		mouseDown = false
-		drawScreens[screen]()
-		Button.draw()
-		Slider.draw()
+                previousScreen = screen
+                screen = newScene
+                mouseDown = false
+                if (setupTouchControls.setActive) {
+                        setupTouchControls.setActive(newScene === "play")
+                }
+                drawScreens[screen]()
+                Button.draw()
+                Slider.draw()
 	}
 	let hitBox = {}
 	let holding = 0
@@ -1266,17 +1366,301 @@ function MineKhan() {
 		changeScene("play")
 	}
 
-	let gl
-	function getPointer() {
-		if (canvas.requestPointerLock) {
-			canvas.requestPointerLock()
-		}
-	}
-	function releasePointer() {
-		if (doc.exitPointerLock) {
-			doc.exitPointerLock()
-		}
-	}
+        let gl
+        function getPointer() {
+                if (touchDevice) {
+                        return
+                }
+                if (canvas.requestPointerLock) {
+                        canvas.requestPointerLock()
+                }
+        }
+        function releasePointer() {
+                if (touchDevice) {
+                        return
+                }
+                if (doc.exitPointerLock) {
+                        doc.exitPointerLock()
+                }
+        }
+
+        function setupTouchControls() {
+                if (!touchDevice || !touchControlsContainer || setupTouchControls.initialized) {
+                        return
+                }
+                touchControlsContainer.classList.remove("hidden")
+                const moveJoystick = touchControlsContainer.querySelector("#move-joystick")
+                const lookJoystick = touchControlsContainer.querySelector("#look-joystick")
+                if (!moveJoystick || !lookJoystick) {
+                        return
+                }
+                const moveThumb = moveJoystick.querySelector(".joystick-thumb")
+                const lookThumb = lookJoystick.querySelector(".joystick-thumb")
+                if (!moveThumb || !lookThumb) {
+                        return
+                }
+
+                setupTouchControls.initialized = true
+
+                const moveLimit = (moveJoystick.offsetWidth - moveThumb.offsetWidth) / 2
+                const lookLimit = (lookJoystick.offsetWidth - lookThumb.offsetWidth) / 2
+                const MOVE_DEADZONE = 12
+                const LOOK_MULTIPLIER = 2
+                const moveState = { id: null, startX: 0, startY: 0 }
+                const lookState = { id: null, startX: 0, startY: 0, prevX: 0, prevY: 0 }
+
+                function clampToRadius(dx, dy, limit) {
+                        const distance = Math.sqrt(dx * dx + dy * dy)
+                        if (!distance) {
+                                return { x: 0, y: 0 }
+                        }
+                        if (distance <= limit) {
+                                return { x: dx, y: dy }
+                        }
+                        const angle = Math.atan2(dy, dx)
+                        return {
+                                x: Math.cos(angle) * limit,
+                                y: Math.sin(angle) * limit,
+                        }
+                }
+
+                function updateMove(dx, dy) {
+                        const clamped = clampToRadius(dx, dy, moveLimit)
+                        moveThumb.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`
+                        Key.w = clamped.y < -MOVE_DEADZONE
+                        Key.s = clamped.y > MOVE_DEADZONE
+                        Key.a = clamped.x < -MOVE_DEADZONE
+                        Key.d = clamped.x > MOVE_DEADZONE
+                }
+
+                function resetMove() {
+                        moveThumb.style.transform = "translate(0px, 0px)"
+                        Key.w = false
+                        Key.s = false
+                        Key.a = false
+                        Key.d = false
+                        moveState.id = null
+                }
+
+                function updateLook(dx, dy) {
+                        const clamped = clampToRadius(dx, dy, lookLimit)
+                        lookThumb.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`
+                }
+
+                function resetLook() {
+                        lookThumb.style.transform = "translate(0px, 0px)"
+                        lookState.id = null
+                }
+
+                moveJoystick.addEventListener("touchstart", e => {
+                        if (!touchControlsContainer.classList.contains("touch-active")) {
+                                return
+                        }
+                        if (moveState.id !== null || !e.changedTouches.length) {
+                                return
+                        }
+                        const touch = e.changedTouches[0]
+                        moveState.id = touch.identifier
+                        moveState.startX = touch.clientX
+                        moveState.startY = touch.clientY
+                        updateMove(0, 0)
+                        e.preventDefault()
+                }, { passive: false })
+
+                lookJoystick.addEventListener("touchstart", e => {
+                        if (!touchControlsContainer.classList.contains("touch-active")) {
+                                return
+                        }
+                        if (lookState.id !== null || !e.changedTouches.length) {
+                                return
+                        }
+                        const touch = e.changedTouches[0]
+                        lookState.id = touch.identifier
+                        lookState.startX = touch.clientX
+                        lookState.startY = touch.clientY
+                        lookState.prevX = touch.clientX
+                        lookState.prevY = touch.clientY
+                        updateLook(0, 0)
+                        e.preventDefault()
+                }, { passive: false })
+
+                const handleDocumentMove = e => {
+                        if (!touchControlsContainer.classList.contains("touch-active")) {
+                                return
+                        }
+                        let prevented = false
+                        if (moveState.id !== null) {
+                                const touch = Array.from(e.touches).find(t => t.identifier === moveState.id)
+                                if (touch) {
+                                        updateMove(touch.clientX - moveState.startX, touch.clientY - moveState.startY)
+                                        prevented = true
+                                }
+                        }
+                        if (lookState.id !== null) {
+                                const touch = Array.from(e.touches).find(t => t.identifier === lookState.id)
+                                if (touch) {
+                                        updateLook(touch.clientX - lookState.startX, touch.clientY - lookState.startY)
+                                        const deltaX = (touch.clientX - lookState.prevX) * LOOK_MULTIPLIER
+                                        const deltaY = (touch.clientY - lookState.prevY) * LOOK_MULTIPLIER
+                                        lookState.prevX = touch.clientX
+                                        lookState.prevY = touch.clientY
+                                        if (screen === "play") {
+                                                mmoved({ movementX: deltaX, movementY: deltaY })
+                                        }
+                                        prevented = true
+                                }
+                        }
+                        if (prevented) {
+                                e.preventDefault()
+                        }
+                }
+
+                const handleDocumentEnd = e => {
+                        let prevented = false
+                        if (moveState.id !== null) {
+                                for (let touch of e.changedTouches) {
+                                        if (touch.identifier === moveState.id) {
+                                                resetMove()
+                                                prevented = true
+                                                break
+                                        }
+                                }
+                        }
+                        if (lookState.id !== null) {
+                                for (let touch of e.changedTouches) {
+                                        if (touch.identifier === lookState.id) {
+                                                resetLook()
+                                                prevented = true
+                                                break
+                                        }
+                                }
+                        }
+                        if (prevented) {
+                                e.preventDefault()
+                        }
+                }
+
+                document.addEventListener("touchmove", handleDocumentMove, { passive: false })
+                document.addEventListener("touchend", handleDocumentEnd, { passive: false })
+                document.addEventListener("touchcancel", handleDocumentEnd, { passive: false })
+
+                const setActive = active => {
+                        if (active) {
+                                touchControlsContainer.classList.add("touch-active")
+                        } else {
+                                touchControlsContainer.classList.remove("touch-active")
+                                resetMove()
+                                resetLook()
+                                Key.leftMouse = false
+                                Key.rightMouse = false
+                                Key[" "] = false
+                                Key.shift = false
+                                mouseDown = false
+                                if (screen === "play" && p && p.sneaking) {
+                                        p.sneaking = false
+                                        p.speed = 0.075
+                                        p.bottomH = 1.62
+                                }
+                        }
+                }
+                setupTouchControls.setActive = setActive
+                setActive(false)
+
+                const bindHoldButton = (id, onStart, onEnd) => {
+                        const element = document.getElementById(id)
+                        if (!element) {
+                                return
+                        }
+                        let activeId = null
+                        const start = e => {
+                                if (!touchControlsContainer.classList.contains("touch-active")) {
+                                        return
+                                }
+                                if (activeId !== null || !e.changedTouches.length) {
+                                        return
+                                }
+                                const touch = e.changedTouches[0]
+                                activeId = touch.identifier
+                                onStart && onStart()
+                                element.classList.add("active")
+                                e.preventDefault()
+                        }
+                        const end = e => {
+                                if (activeId === null) {
+                                        return
+                                }
+                                for (let touch of e.changedTouches) {
+                                        if (touch.identifier === activeId) {
+                                                activeId = null
+                                                onEnd && onEnd()
+                                                element.classList.remove("active")
+                                                e.preventDefault()
+                                                break
+                                        }
+                                }
+                        }
+                        element.addEventListener("touchstart", start, { passive: false })
+                        element.addEventListener("touchend", end, { passive: false })
+                        element.addEventListener("touchcancel", end, { passive: false })
+                }
+
+                bindHoldButton("attack-button", () => {
+                        Key.leftMouse = true
+                        mouseDown = true
+                        p.lastBreak = Date.now() - 300
+                        if (screen === "play") {
+                                changeWorldBlock(0)
+                        }
+                }, () => {
+                        Key.leftMouse = false
+                        mouseDown = Key.rightMouse
+                })
+
+                bindHoldButton("place-button", () => {
+                        Key.rightMouse = true
+                        mouseDown = true
+                        p.lastPlace = Date.now() - 300
+                        if (screen === "play") {
+                                newWorldBlock()
+                        }
+                }, () => {
+                        Key.rightMouse = false
+                        mouseDown = Key.leftMouse
+                })
+
+                bindHoldButton("jump-button", () => {
+                        Key[" "] = true
+                        if (screen === "play" && p && !p.spectator) {
+                                if (Date.now() < p.lastJump + 400) {
+                                        p.flying ^= true
+                                } else {
+                                        p.lastJump = Date.now()
+                                }
+                        }
+                }, () => {
+                        Key[" "] = false
+                })
+
+                bindHoldButton("sneak-button", () => {
+                        Key.shift = true
+                        if (screen === "play" && p && !p.flying) {
+                                p.sneaking = true
+                                if (p.sprinting) {
+                                        p.FOV(settings.fov, 100)
+                                }
+                                p.sprinting = false
+                                p.speed = 0.03
+                                p.bottomH = 1.32
+                        }
+                }, () => {
+                        Key.shift = false
+                        if (screen === "play" && p && p.sneaking) {
+                                p.sneaking = false
+                                p.speed = 0.075
+                                p.bottomH = 1.62
+                        }
+                })
+        }
 
 	let Block = {
 		top: 0x4,
@@ -5427,16 +5811,20 @@ function MineKhan() {
 			message.innerHTML = '.oot lanigiro eht tuo kcehc ot>rb<erus eb ,siht ekil uoy fI>rb<.dralliW yb >a/<nahKeniM>"wen_"=tegrat "8676731005517465/cm/sc/gro.ymedacanahk.www//:sptth"=ferh a< fo>rb<ffo-nips a si margorp sihT'.split("").reverse().join("")
 		}
 
-		initBackgrounds()
-		
-		drawScreens[screen]()
-		Button.draw()
-		Slider.draw()
+                initBackgrounds()
 
-		p.FOV(settings.fov)
-		initWorldsMenu()
-		initButtons()
-	}
+                drawScreens[screen]()
+                Button.draw()
+                Slider.draw()
+
+                p.FOV(settings.fov)
+                initWorldsMenu()
+                initButtons()
+                setupTouchControls()
+                if (setupTouchControls.setActive) {
+                        setupTouchControls.setActive(screen === "play")
+                }
+        }
 
 	// Define all the scene draw functions
 	(function() {
